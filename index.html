@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Kootenay Indigenous Map</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-sA+e2wb6L3V5VhJdVjA1fE24v1l7Zz25nE3D5FvC9z4="
+        crossorigin=""/>
+  
+  <style>
+    body { margin:0; padding:0; }
+    #map { width: 100%; height: 100vh; }
+  </style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-oI2Fr0lGtr0C5hZj4kIj6kDkqkghvJ6vTzv7Z0zQbJE="
+        crossorigin=""></script>
+
+<script>
+  // Initialize map centered on Kootenay
+  const map = L.map('map').setView([51.5, -117.5], 8);
+
+  // Add OpenStreetMap tile layer
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
+
+  // Load GeoJSON file
+  fetch('Kootneaymap.geojson')
+    .then(response => response.json())
+    .then(data => {
+      L.geoJSON(data, {
+        style: feature => ({
+          color: feature.properties.color || '#3388ff',
+          weight: 2,
+          fillOpacity: 0.4
+        }),
+        onEachFeature: (feature, layer) => {
+          let popupContent = `<strong>${feature.properties.name || "Unknown"}</strong>`;
+          if (feature.properties.english_name) popupContent += `<br>English Name: ${feature.properties.english_name}`;
+          if (feature.properties.landmark) popupContent += `<br>Landmark: ${feature.properties.landmark}`;
+          layer.bindPopup(popupContent);
+        }
+      }).addTo(map);
+    })
+    .catch(err => console.error("Error loading GeoJSON:", err));
+</script>
+
+</body>
+</html>
